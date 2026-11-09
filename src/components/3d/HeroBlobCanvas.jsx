@@ -123,39 +123,44 @@ const fragmentShader = `
     vec3 normal = normalize(vNormal);
     vec3 viewDir = normalize(-vPosition);
 
-    // Fresnel effect for edge glow and pearlescent iridescence
-    float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.2);
+    // Fresnel rim effect
+    float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.4);
 
-    // Iridescent Color Palette (Cobalt Blue -> Royal Purple -> Radiant Magenta/Pink -> Cyan sheen)
-    vec3 colorBlue = vec3(0.08, 0.28, 0.98);
-    vec3 colorPurple = vec3(0.58, 0.12, 0.96);
-    vec3 colorPink = vec3(0.96, 0.22, 0.65);
-    vec3 colorCyan = vec3(0.25, 0.90, 0.98);
-    vec3 colorDeep = vec3(0.04, 0.04, 0.10);
+    // Deep iridescent palette — rich dark jewel tones matching the reference artwork
+    vec3 colorDeepBlue   = vec3(0.04, 0.10, 0.70);   // deep electric cobalt
+    vec3 colorRoyalPurple= vec3(0.38, 0.05, 0.75);   // rich royal violet
+    vec3 colorViolet     = vec3(0.60, 0.08, 0.90);   // vivid neon violet
+    vec3 colorMagenta    = vec3(0.82, 0.10, 0.60);   // hot magenta/pink
+    vec3 colorCyanSheen  = vec3(0.10, 0.60, 0.95);   // iridescent cyan rim
+    vec3 colorCore       = vec3(0.03, 0.02, 0.12);   // near-black obsidian core
 
-    // Mix color based on position, displacement, and time
-    float factor = sin(vPosition.x * 1.5 + vPosition.y * 1.2 + uTime * 0.5) * 0.5 + 0.5;
-    vec3 baseColor = mix(colorBlue, colorPurple, factor);
-    baseColor = mix(baseColor, colorPink, smoothstep(-0.2, 0.4, vDisplacement));
+    // Animate colour mixing over time and displacement
+    float t = sin(vPosition.x * 1.8 + vPosition.y * 1.4 + uTime * 0.55) * 0.5 + 0.5;
+    float t2 = sin(vPosition.z * 1.3 - vPosition.x * 1.1 + uTime * 0.38) * 0.5 + 0.5;
 
-    // Specular light reflection (Glossy highlight)
+    vec3 baseColor = mix(colorDeepBlue, colorRoyalPurple, t);
+    baseColor = mix(baseColor, colorViolet, t2 * 0.7);
+    baseColor = mix(baseColor, colorMagenta, smoothstep(0.0, 0.5, vDisplacement));
+    baseColor = mix(baseColor, colorCore, 0.12);
+
+    // Glossy specular highlights
     vec3 lightDir1 = normalize(vec3(1.2, 1.8, 2.0));
-    vec3 halfVector1 = normalize(lightDir1 + viewDir);
-    float spec1 = pow(max(dot(normal, halfVector1), 0.0), 48.0);
+    vec3 halfVec1 = normalize(lightDir1 + viewDir);
+    float spec1 = pow(max(dot(normal, halfVec1), 0.0), 64.0);
 
     vec3 lightDir2 = normalize(vec3(-1.5, -0.8, 1.0));
-    vec3 halfVector2 = normalize(lightDir2 + viewDir);
-    float spec2 = pow(max(dot(normal, halfVector2), 0.0), 32.0);
+    vec3 halfVec2 = normalize(lightDir2 + viewDir);
+    float spec2 = pow(max(dot(normal, halfVec2), 0.0), 36.0);
 
-    // Combine base colors, iridescent rim, and specular highlight
-    vec3 finalColor = mix(baseColor, colorDeep, 0.15);
-    finalColor += colorCyan * fresnel * 0.85;
-    finalColor += colorPink * fresnel * 0.45;
-    finalColor += vec3(1.0) * spec1 * 0.9;
-    finalColor += colorCyan * spec2 * 0.4;
+    // Combine: base + cyan iridescent rim + hot specular
+    vec3 finalColor = baseColor;
+    finalColor += colorCyanSheen * fresnel * 0.70;
+    finalColor += colorMagenta   * fresnel * 0.35;
+    finalColor += vec3(0.9, 0.8, 1.0) * spec1 * 0.65;   // cool white highlight
+    finalColor += colorCyanSheen       * spec2 * 0.30;
 
-    // Atmospheric transparency gradient towards boundaries
-    float alpha = 0.94 + fresnel * 0.06;
+    // Keep mostly opaque, slight edge fade
+    float alpha = 0.97 + fresnel * 0.03;
 
     gl_FragColor = vec4(finalColor, alpha);
   }
