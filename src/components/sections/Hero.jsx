@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import HeroBlobCanvas from "../3d/HeroBlobCanvas";
+import LiquidEther from "../3d/LiquidEther";
 import RotatingBadge from "../common/RotatingBadge";
 import { personalData, socialLinks } from "../../data/content";
 
@@ -21,16 +21,38 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen w-full flex flex-col justify-between pt-24 pb-10 px-6 sm:px-12 overflow-hidden bg-[#070707] select-none"
+      className="relative min-h-screen w-full flex flex-col justify-between pt-24 pb-10 px-6 sm:px-12 overflow-hidden select-none"
+      style={{
+        background: 'radial-gradient(ellipse 120% 70% at 50% 40%, #1a0533 0%, #0d0118 30%, #070707 65%, #07070a 100%)',
+      }}
     >
-      {/* Top ambient radial glow */}
-      <div className="ambient-glow-top" />
+      {/* Layered ambient glows — purple core, blue left, pink right */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        {/* Deep violet core bloom */}
+        <div className="absolute top-[15%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-purple-900/40 blur-[120px]" />
+        {/* Electric blue left wash */}
+        <div className="absolute top-[20%] -left-20 w-[500px] h-[400px] rounded-full bg-blue-800/25 blur-[130px]" />
+        {/* Neon pink right accent */}
+        <div className="absolute top-[25%] -right-20 w-[450px] h-[400px] rounded-full bg-pink-800/20 blur-[130px]" />
+        {/* Subtle bottom fade to black */}
+        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#070707] to-transparent" />
+      </div>
 
-      {/* 3D Iridescent Organic Blob — Center Stage behind/around headline */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-        <div className="w-[340px] h-[340px] sm:w-[540px] sm:h-[540px] md:w-[680px] md:h-[680px] lg:w-[760px] lg:h-[760px] pointer-events-auto">
-          <HeroBlobCanvas />
-        </div>
+      {/* LiquidEther fluid simulation — full-cover behind headline */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <LiquidEther
+          colors={['#1a0870', '#7c12d4', '#c2156a']}
+          mouseForce={22}
+          cursorSize={120}
+          persistence={0.78}
+          autoDemo={true}
+          autoSpeed={0.45}
+          autoIntensity={2.4}
+          intensity={1.3}
+          intro={true}
+          clickBurst={true}
+          style={{ width: '100%', height: '100%', pointerEvents: 'auto' }}
+        />
       </div>
 
       {/* Hero Headline Content */}
